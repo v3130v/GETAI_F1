@@ -15,29 +15,29 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import React, {useState} from 'react';
-import {AddVideoPage} from './components/AddVideoPage';
-import {AdminPage} from './components/AdminPage';
-import {EditMetadataModal} from './components/EditMetadataModal';
-import {ErrorModal} from './components/ErrorModal';
-import {Footer} from './components/Footer';
-import {LoginPage} from './components/LoginPage';
-import {SavingProgressPage} from './components/SavingProgressPage';
-import {Sidebar} from './components/Sidebar';
-import {VideoGrid} from './components/VideoGrid';
-import {VideoPlayer} from './components/VideoPlayer';
+import React, {useState, useEffect} from 'react';
+import {AddVideoPage} from './components/AddVideoPage.tsx';
+import {AdminPage} from './components/AdminPage.tsx';
+import {EditMetadataModal} from './components/EditMetadataModal.tsx';
+import {ErrorModal} from './components/ErrorModal.tsx';
+import {Footer} from './components/Footer.tsx';
+import {LoginPage} from './components/LoginPage.tsx';
+import {SavingProgressPage} from './components/SavingProgressPage.tsx';
+import {Sidebar} from './components/Sidebar.tsx';
+import {VideoGrid} from './components/VideoGrid.tsx';
+import {VideoPlayer} from './components/VideoPlayer.tsx';
 import {
   MOCK_CONTACT_INFO,
   MOCK_PORTFOLIO_LINKS,
   MOCK_SOCIAL_LINKS,
   MOCK_VIDEOS,
-} from './constants';
+} from './constants.ts';
 import {ContactInfo, PortfolioLink, SocialLinks, Video} from './types';
-import {HomePage} from './components/HomePage';
+import {HomePage} from './components/HomePage.tsx';
 
 import {GeneratedVideo, GoogleGenAI} from '@google/genai';
-import {ContactSection} from './components/ContactSection';
-import {FeaturedWork} from './components/FeaturedWork';
+import {ContactSection} from './components/ContactSection.tsx';
+import {FeaturedWork} from './components/FeaturedWork.tsx';
 
 type AdminOverlay =
   | 'login'
@@ -130,6 +130,17 @@ async function generateVideoFromText(
   }
 }
 
+// Helper to get item from localStorage
+const getStoredItem = <T,>(key: string, fallback: T): T => {
+  try {
+    const item = window.localStorage.getItem(key);
+    return item ? JSON.parse(item) : fallback;
+  } catch (error) {
+    console.error(`Error reading ${key} from localStorage`, error);
+    return fallback;
+  }
+};
+
 /**
  * Main component for the Veo3 Gallery app.
  * It manages the state of videos, playing videos, editing videos and error handling.
@@ -138,19 +149,49 @@ export const App: React.FC = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [adminOverlay, setAdminOverlay] = useState<AdminOverlay>(null);
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const [videos, setVideos] = useState<Video[]>(MOCK_VIDEOS);
+  const [videos, setVideos] = useState<Video[]>(() =>
+    getStoredItem('veo3_gallery_videos', MOCK_VIDEOS),
+  );
   const [playingVideo, setPlayingVideo] = useState<Video | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [generationError, setGenerationError] = useState<{
     title: string;
     message: string[];
   } | null>(null);
-  const [portfolioLinks, setPortfolioLinks] =
-    useState<PortfolioLink[]>(MOCK_PORTFOLIO_LINKS);
-  const [contactInfo, setContactInfo] =
-    useState<ContactInfo>(MOCK_CONTACT_INFO);
-  const [socialLinks, setSocialLinks] =
-    useState<SocialLinks>(MOCK_SOCIAL_LINKS);
+  const [portfolioLinks, setPortfolioLinks] = useState<PortfolioLink[]>(() =>
+    getStoredItem('veo3_gallery_portfolio_links', MOCK_PORTFOLIO_LINKS),
+  );
+  const [contactInfo, setContactInfo] = useState<ContactInfo>(() =>
+    getStoredItem('veo3_gallery_contact_info', MOCK_CONTACT_INFO),
+  );
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>(() =>
+    getStoredItem('veo3_gallery_social_links', MOCK_SOCIAL_LINKS),
+  );
+
+  useEffect(() => {
+    localStorage.setItem('veo3_gallery_videos', JSON.stringify(videos));
+  }, [videos]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'veo3_gallery_portfolio_links',
+      JSON.stringify(portfolioLinks),
+    );
+  }, [portfolioLinks]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'veo3_gallery_contact_info',
+      JSON.stringify(contactInfo),
+    );
+  }, [contactInfo]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'veo3_gallery_social_links',
+      JSON.stringify(socialLinks),
+    );
+  }, [socialLinks]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
