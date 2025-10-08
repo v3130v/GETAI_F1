@@ -141,6 +141,15 @@ const getStoredItem = <T,>(key: string, fallback: T): T => {
   }
 };
 
+// Helper to set item in localStorage
+const setStoredItem = (key: string, value: unknown) => {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.error(`Error writing to ${key} in localStorage`, error);
+  }
+};
+
 /**
  * Main component for the Veo3 Gallery app.
  * It manages the state of videos, playing videos, editing videos and error handling.
@@ -169,28 +178,19 @@ export const App: React.FC = () => {
   );
 
   useEffect(() => {
-    localStorage.setItem('veo3_gallery_videos', JSON.stringify(videos));
+    setStoredItem('veo3_gallery_videos', videos);
   }, [videos]);
 
   useEffect(() => {
-    localStorage.setItem(
-      'veo3_gallery_portfolio_links',
-      JSON.stringify(portfolioLinks),
-    );
+    setStoredItem('veo3_gallery_portfolio_links', portfolioLinks);
   }, [portfolioLinks]);
 
   useEffect(() => {
-    localStorage.setItem(
-      'veo3_gallery_contact_info',
-      JSON.stringify(contactInfo),
-    );
+    setStoredItem('veo3_gallery_contact_info', contactInfo);
   }, [contactInfo]);
 
   useEffect(() => {
-    localStorage.setItem(
-      'veo3_gallery_social_links',
-      JSON.stringify(socialLinks),
-    );
+    setStoredItem('veo3_gallery_social_links', socialLinks);
   }, [socialLinks]);
 
   const sensors = useSensors(
